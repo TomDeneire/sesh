@@ -32,7 +32,7 @@ func List(o Options, srcs Srcs) []Session {
 	tmuxSessions := make([]*tmux.TmuxSession, 0)
 	if !anySrcs || srcs.Tmux {
 		tmuxList, err := tmux.List(tmux.Options{
-			HideAttached: o.HideAttached,
+			HideAttached: true,
 		})
 		tmuxSessions = append(tmuxSessions, tmuxList...)
 		if err != nil {
