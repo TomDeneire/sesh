@@ -29,10 +29,11 @@ func List(o Options, srcs Srcs) []Session {
 	var sessions []Session
 	anySrcs := checkAnyTrue(srcs)
 
+	var attachedSession Session
 	tmuxSessions := make([]*tmux.TmuxSession, 0)
 	if !anySrcs || srcs.Tmux {
 		tmuxList, err := tmux.List(tmux.Options{
-			HideAttached: true,
+			HideAttached: false,
 		})
 		tmuxSessions = append(tmuxSessions, tmuxList...)
 		if err != nil {
@@ -40,6 +41,8 @@ func List(o Options, srcs Srcs) []Session {
 			os.Exit(1)
 		}
 		tmuxSessionNames := make([]Session, len(tmuxList))
+		attachedIndex := 0
+		attached := false
 		for i, session := range tmuxSessions {
 			// TODO: allow support for connect as well (PrettyName?)
 			// tmuxSessionNames[i] = session.Name + " (" + convert.PathToPretty(session.Path) + ")"
@@ -50,6 +53,14 @@ func List(o Options, srcs Srcs) []Session {
 				Attached: session.Attached,
 				Windows:  session.Windows,
 			}
+			if session.Attached == 1 {
+				attachedSession = tmuxSessionNames[i]
+				attachedIndex = i
+				attached = true
+			}
+		}
+		if attached {
+			tmuxSessionNames = append(tmuxSessionNames[:attachedIndex], tmuxSessionNames[attachedIndex+1:]...)
 		}
 		sessions = append(sessions, tmuxSessionNames...)
 	}
@@ -69,9 +80,9 @@ func List(o Options, srcs Srcs) []Session {
 				Score: result.Score,
 			}
 		}
-		var div Session
+		div := attachedSession
 		div.Attached = 0
-		div.Name = "——————————————————————————————"
+		div.Name = "————————————(" + attachedSession.Name + ")————————————"
 		sessions = append(sessions, div)
 		sessions = append(sessions, zoxideResultNames...)
 	}
