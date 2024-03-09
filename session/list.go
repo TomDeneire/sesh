@@ -80,10 +80,12 @@ func List(o Options, srcs Srcs) []Session {
 				Score: result.Score,
 			}
 		}
-		div := attachedSession
-		div.Attached = 0
-		div.Name = "————————————(" + attachedSession.Name + ")————————————"
-		sessions = append(sessions, div)
+		if attachedSession.Name != "" {
+			div := attachedSession
+			div.Attached = 0
+			div.Name = "————————————(" + attachedSession.Name + ")————————————"
+			sessions = append(sessions, div)
+		}
 		sessions = append(sessions, zoxideResultNames...)
 	}
 
